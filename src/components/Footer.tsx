@@ -9,10 +9,10 @@ export const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="text-center md:text-left">
             <p className="font-semibold text-lg mb-1">
-              Predicción de Ventas en Retail
+              Proyecto de Predicción de Ventas en Retail
             </p>
             <p className="text-sm opacity-90">
-              Proyecto Universitario de Inteligencia Artificial
+              Universidad Privada Antenor Orrego
             </p>
             <p className="text-xs opacity-75 mt-2">
               © {currentYear} - Todos los derechos reservados
@@ -21,7 +21,7 @@ export const Footer = () => {
           
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com"
+              href="https://github.com/laespiga0120/sales-forecast-lab"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg hover:bg-primary-hover transition-colors"

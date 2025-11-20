@@ -5,64 +5,71 @@ const Pipeline = () => {
   const stages = [
     {
       icon: Database,
-      title: "Carga de Datos",
-      description: "Importación del dataset histórico de ventas en formato CSV/SQL",
-      details: ["Lectura de archivos", "Validación de estructura", "Detección de tipos de datos"],
+      title: "Carga y Fusión de Datos",
+      description: "Consolidación de las bases de datos transaccionales y de metadatos de las tiendas.",
+      // Se detalla la carga de los 3 archivos y la fusión por Store [cite: 510, 511, 523]
+      details: ["Carga de train.csv, test.csv y store.csv", "Fusión de datos (Left Join por 'Store')", "Conversión de columna 'Date' a formato datetime"],
       color: "primary",
     },
     {
       icon: Filter,
-      title: "Limpieza de Datos",
-      description: "Eliminación de registros incompletos y valores atípicos",
-      details: ["Manejo de valores nulos", "Detección de outliers", "Normalización de formatos"],
+      title: "Limpieza y Filtrado de Datos",
+      description: "Tratamiento de valores faltantes y eliminación de registros no relevantes para la predicción.",
+      // Se detalla la imputación y el filtrado por tiendas cerradas/ventas cero [cite: 583, 584, 589]
+      details: ["Imputación de nulos con mediana/cero", "Filtrado de tiendas cerradas (Open=0)", "Filtrado de ventas iguales a cero (Sales=0)"],
       color: "accent",
     },
     {
       icon: Code,
       title: "Codificación de Variables",
-      description: "Transformación de variables categóricas a numéricas",
-      details: ["One-Hot Encoding", "Label Encoding", "Ordinal Encoding"],
+      description: "Transformación de variables categóricas a un formato legible para los modelos.",
+      // Se especifica el uso de One-Hot Encoding [cite: 585, 588]
+      details: ["One-Hot Encoding (StoreType, Assortment)", "Mapeo a valores enteros (StateHoliday)", "Escalado de características numéricas"],
       color: "primary",
     },
     {
       icon: TrendingUp,
       title: "Ingeniería de Características",
-      description: "Creación de variables derivadas para mejorar el modelo",
+      description: "Creación de variables derivadas para capturar patrones temporales y contextuales.",
+      // Se detallan los 4 tipos de features creados [cite: 524, 545, 547, 561, 563]
       details: [
-        "Lags temporales (7, 14, 30 días)",
-        "Medias móviles (rolling means)",
-        "Indicadores promocionales",
-        "Variables de competencia",
-        "Estacionalidad y tendencias",
+        "Extracción de componentes temporales (Año, Mes, Semana)",
+        "Creación de Lags y Medias Móviles (7, 14, 28 días)",
+        "Antigüedad de la Competencia (CompetitionAgeInMonths)",
+        "Estado de la Promoción Continua (IsPromo2Active)",
       ],
       color: "gold",
     },
     {
       icon: GitBranch,
-      title: "División Temporal",
-      description: "Separación de datos en conjuntos de entrenamiento y prueba",
-      details: ["80% entrenamiento", "20% validación", "Preservación orden temporal"],
+      title: "División Cronológica de Datos",
+      description: "Separación de datos respetando el orden del tiempo para evitar fugas de información.",
+      // Se corrige la división a 80/10/10 y el uso del orden cronológico [cite: 602, 603, 604, 608]
+      details: ["División Cronológica estricta (80/10/10)", "80% Entrenamiento (datos más antiguos)", "10% Validación y 10% Prueba (datos más recientes)"],
       color: "accent",
     },
     {
       icon: Brain,
-      title: "Entrenamiento del Modelo",
-      description: "Ajuste de algoritmos de Machine Learning y Deep Learning",
-      details: ["Random Forest", "LSTM Networks", "Optimización de hiperparámetros"],
+      title: "Entrenamiento y Optimización",
+      description: "Ajuste de los modelos Random Forest y GRU para la predicción de ventas.",
+      // Se actualiza de LSTM a GRU y se menciona la optimización [cite: 415, 726]
+      details: ["Entrenamiento del modelo Random Forest Regressor", "Entrenamiento del modelo secuencial GRU", "Optimización con GridSearchCV y TimeSeriesSplit"],
       color: "primary",
     },
     {
       icon: CheckCircle,
-      title: "Evaluación",
-      description: "Medición del rendimiento con métricas estadísticas",
-      details: ["Cálculo de R²", "MAE, RMSE, MAPE", "Análisis de residuales"],
+      title: "Evaluación Final",
+      description: "Medición imparcial del rendimiento de los modelos en datos no vistos.",
+      // Se especifican las métricas y la des-normalización [cite: 1001, 1002, 1003, 1022]
+      details: ["Cálculo de R², RMSE, MAE y MAPE", "Des-escalado de predicciones a unidades de venta (euros)", "Diagnóstico de sobreajuste (Train vs. Validation Loss)"],
       color: "accent",
     },
     {
       icon: Target,
-      title: "Generación de Predicciones",
-      description: "Aplicación del modelo para predecir ventas futuras",
-      details: ["Predicción por rangos", "Intervalos de confianza", "Visualización de resultados"],
+      title: "Generación de Pronósticos",
+      description: "Aplicación del mejor modelo para anticipar la demanda de productos en el futuro.",
+      // Se enfoca la descripción en el objetivo de la predicción y el análisis visual [cite: 79, 1032]
+      details: ["Pronósticos para la gestión de inventario", "Visualización de Predicciones vs. Ventas Reales", "Análisis de sesgos de subestimación en picos de demanda"],
       color: "gold",
     },
   ];
