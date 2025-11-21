@@ -74,7 +74,7 @@ const Models = () => {
               </div>
             </div>
             <div className="mt-4 p-4 bg-accent/10 rounded-lg border border-accent/20">
-              <p className="text-sm text-accent-foreground">
+              <p className="text-sm text-gold-foreground">
                 <span className="font-medium">Conclusión:</span> Modelo con excelente capacidad predictiva (R² = 0.924), 
                 bajo error medio y alta precisión en tendencias generales. Ideal para predicciones a corto plazo.
               </p>
@@ -116,7 +116,7 @@ const Models = () => {
                 <p className="text-sm"><span className="font-medium">Tiempo entrenamiento:</span> 2.5 horas</p>
               </div>
             </div>
-            <div className="mt-4 p-4 bg-gold/10 rounded-lg border border-gold/20">
+            <div className="mt-4 p-4 bg-accent/10 rounded-lg border border-accent/20">
               <p className="text-sm text-gold-foreground">
                 <span className="font-medium">Conclusión:</span> El modelo captura la tendencia general pero reduce picos altos. 
                 Rendimiento ligeramente inferior al ML clásico en métricas, pero mejor en series con patrones complejos.
