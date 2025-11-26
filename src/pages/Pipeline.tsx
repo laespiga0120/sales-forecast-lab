@@ -1,69 +1,86 @@
 import { Card } from "@/components/ui/card";
-import { Database, Filter, Code, TrendingUp, GitBranch, Brain, CheckCircle, Target } from "lucide-react";
+import { Database, Filter, Code, TrendingUp, GitBranch, Brain, CheckCircle, Zap } from "lucide-react";
 
 const Pipeline = () => {
   const stages = [
     {
       icon: Database,
-      title: "Carga de Datos",
-      description: "Importación del dataset histórico de ventas en formato CSV/SQL",
-      details: ["Lectura de archivos", "Validación de estructura", "Detección de tipos de datos"],
-      color: "primary",
-    },
-    {
-      icon: Filter,
-      title: "Limpieza de Datos",
-      description: "Eliminación de registros incompletos y valores atípicos",
-      details: ["Manejo de valores nulos", "Detección de outliers", "Normalización de formatos"],
-      color: "accent",
-    },
-    {
-      icon: Code,
-      title: "Codificación de Variables",
-      description: "Transformación de variables categóricas a numéricas",
-      details: ["One-Hot Encoding", "Label Encoding", "Ordinal Encoding"],
+      title: "Ingesta y Fusión de Datos",
+      description: "Consolidación de fuentes transaccionales y relacionales",
+      details: [
+        "Merge de Train.csv y Store.csv (Left Join)", // [cite: 586]
+        "Integración de datos climáticos externos", // [cite: 556]
+        "Imputación de distancias de competencia" // [cite: 331]
+      ],
       color: "primary",
     },
     {
       icon: TrendingUp,
       title: "Ingeniería de Características",
-      description: "Creación de variables derivadas para mejorar el modelo",
+      description: "Creación de variables temporales y de negocio",
       details: [
-        "Lags temporales (7, 14, 30 días)",
-        "Medias móviles (rolling means)",
-        "Indicadores promocionales",
-        "Variables de competencia",
-        "Estacionalidad y tendencias",
+        "Extracción: Año, Mes, Día, Semana", // [cite: 600]
+        "Lags (Rezagos): 1, 7 y 14 días", // 
+        "Medias Móviles: 7, 14 y 28 días", // 
+        "Estado de Promociones (Promo2)" // [cite: 638]
       ],
       color: "gold",
     },
     {
-      icon: GitBranch,
-      title: "División Temporal",
-      description: "Separación de datos en conjuntos de entrenamiento y prueba",
-      details: ["80% entrenamiento", "20% validación", "Preservación orden temporal"],
-      color: "accent",
-    },
-    {
-      icon: Brain,
-      title: "Entrenamiento del Modelo",
-      description: "Ajuste de algoritmos de Machine Learning y Deep Learning",
-      details: ["Random Forest", "LSTM Networks", "Optimización de hiperparámetros"],
+      icon: Code,
+      title: "Preprocesamiento y Escalado",
+      description: "Transformación de datos para modelos ML/DL",
+      details: [
+        "One-Hot Encoding (StoreType, Assortment)", // [cite: 334]
+        "MinMaxScaler (0-1) para Redes Neuronales", // [cite: 339]
+        "Filtrado: Open=1 y Sales>0" // [cite: 332]
+      ],
       color: "primary",
     },
     {
-      icon: CheckCircle,
-      title: "Evaluación",
-      description: "Medición del rendimiento con métricas estadísticas",
-      details: ["Cálculo de R²", "MAE, RMSE, MAPE", "Análisis de residuales"],
+      icon: Zap,
+      title: "Optimización de Memoria",
+      description: "Pipeline eficiente para grandes volúmenes de datos",
+      details: [
+        "Clase personalizada DataGenerator", // [cite: 929]
+        "Carga dinámica por lotes (Batches)", // [cite: 931]
+        "Pipeline tf.data con Prefetching" // [cite: 991]
+      ],
       color: "accent",
     },
     {
-      icon: Target,
-      title: "Generación de Predicciones",
-      description: "Aplicación del modelo para predecir ventas futuras",
-      details: ["Predicción por rangos", "Intervalos de confianza", "Visualización de resultados"],
+      icon: GitBranch,
+      title: "División Cronológica",
+      description: "Estrategia de validación Time Series Split",
+      details: [
+        "80% Entrenamiento", // 
+        "10% Validación (Tuning)",
+        "10% Prueba (Evaluación Final)",
+        "Respeto estricto del orden temporal" // [cite: 675]
+      ],
+      color: "primary",
+    },
+    {
+      icon: Brain,
+      title: "Modelado Híbrido",
+      description: "Entrenamiento de arquitecturas complementarias",
+      details: [
+        "Random Forest (Línea base robusta)", // [cite: 484]
+        "GRU (Gated Recurrent Unit) para secuencias", // [cite: 486]
+        "GridSearchCV para hiperparámetros" // [cite: 787]
+      ],
       color: "gold",
+    },
+    {
+      icon: CheckCircle,
+      title: "Evaluación y Métricas",
+      description: "Análisis de desempeño sobre datos no vistos",
+      details: [
+        "RMSE (Métrica principal)", // [cite: 505]
+        "MAPE (< 7% en RF)", // [cite: 1164]
+        "Detección de sesgo de subestimación" // [cite: 1128]
+      ],
+      color: "accent",
     },
   ];
   
@@ -73,7 +90,8 @@ const Pipeline = () => {
         <div className="mb-12 text-center">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Pipeline del Sistema</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Proceso completo desde la carga de datos hasta la generación de predicciones de ventas
+            Arquitectura de procesamiento end-to-end: desde la ingesta de datos brutos hasta 
+            la predicción optimizada mediante modelos híbridos.
           </p>
         </div>
         
@@ -116,7 +134,7 @@ const Pipeline = () => {
                             stage.color === "accent" ? "text-accent" :
                             "text-gold"
                           }`}>
-                            ETAPA {index + 1}
+                            FASE {index + 1}
                           </span>
                         </div>
                         
@@ -153,23 +171,23 @@ const Pipeline = () => {
         {/* Summary Card */}
         <Card className="mt-12 p-8 bg-gradient-to-br from-primary/5 to-accent/5">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Pipeline Completo y Robusto</h2>
+            <h2 className="text-2xl font-bold mb-4">Arquitectura Optimizada</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-              El sistema implementa un proceso end-to-end que garantiza calidad en cada etapa, 
-              desde la preparación de datos hasta la generación de predicciones confiables para la toma de decisiones.
+              El pipeline implementa soluciones avanzadas como <strong>Data Generators</strong> para la gestión eficiente de memoria 
+              y utiliza una estrategia de <strong>Validación Cruzada Temporal</strong> para garantizar que el modelo no "vea el futuro" durante el entrenamiento.
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-lg border">
                 <CheckCircle className="h-4 w-4 text-accent" />
-                <span className="font-medium">Automatizado</span>
+                <span className="font-medium">Memoria Eficiente (tf.data)</span>
               </div>
-              <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-lg border">
                 <CheckCircle className="h-4 w-4 text-accent" />
-                <span className="font-medium">Reproducible</span>
+                <span className="font-medium">Anti-Data Leakage</span>
               </div>
-              <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2 bg-background px-4 py-2 rounded-lg border">
                 <CheckCircle className="h-4 w-4 text-accent" />
-                <span className="font-medium">Escalable</span>
+                <span className="font-medium">Escalable (Cloud Ready)</span>
               </div>
             </div>
           </div>

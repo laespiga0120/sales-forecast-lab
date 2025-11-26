@@ -124,9 +124,9 @@ const Home = () => {
                 </Button>
                 <Button 
                   size="lg" 
-                  variant="outline"
+                  variant="secondary"
                   onClick={() => navigate("/pipeline")}
-                  className="border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10"
+                  className="bg-background text-foreground hover:bg-background/90"
                 >
                   <GitBranch className="mr-2 h-5 w-5" />
                   Ver Pipeline del Sistema

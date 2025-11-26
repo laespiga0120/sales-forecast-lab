@@ -12,7 +12,7 @@ export const Footer = () => {
               Predicción de Ventas en Retail
             </p>
             <p className="text-sm opacity-90">
-              Proyecto Universitario de Inteligencia Artificial
+              Proyecto de Inteligencia Artificial: Principios y Técnicas - Universidad Privada Antenor Orrego
             </p>
             <p className="text-xs opacity-75 mt-2">
               © {currentYear} - Todos los derechos reservados
@@ -21,22 +21,13 @@ export const Footer = () => {
           
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com"
+              href="https://github.com/laespiga0120/sales-forecast-lab"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg hover:bg-primary-hover transition-colors"
               aria-label="GitHub"
             >
               <Github className="h-5 w-5" />
-            </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-lg hover:bg-primary-hover transition-colors"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="h-5 w-5" />
             </a>
           </div>
         </div>
