@@ -1,167 +1,256 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { StatCard } from "@/components/StatCard";
-import { Database, Store, TrendingUp, DollarSign } from "lucide-react";
+import { StatCard } from "@/components/StatCard"; // Asegúrate de tener este componente
+import { Database, Store, Users, TrendingUp, DollarSign, PieChart as PieIcon, BarChart3, Loader2 } from "lucide-react";
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { toast } from "sonner";
 
 const Dashboard = () => {
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+  // --- ESTADOS DE DATOS ---
+  const [kpis, setKpis] = useState<any>(null);
+  const [topStores, setTopStores] = useState([]);
+  const [salesHistory, setSalesHistory] = useState([]);
+  const [storeTypes, setStoreTypes] = useState([]);
+  const [quarterlyData, setQuarterlyData] = useState([]);
+  
+  const [loading, setLoading] = useState(true);
 
-    // Colores para el gráfico de pastel
-    const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+  // --- FUNCIÓN DE FORMATO DE MONEDA COMPACTO ---
+  // Convierte 1,500,000 en "1.5M €" para ejes de gráficos
+  const formatCompactCurrency = (value: number) => {
+    return new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: 'EUR',
+      notation: "compact",
+      maximumFractionDigits: 1
+    }).format(value);
+  };
 
-    useEffect(() => {
-        const fetchDashboard = async () => {
-            try {
-                const response = await fetch('http://localhost:8000/api/v1/dashboard');
-                if (!response.ok) throw new Error("Error al cargar datos del servidor");
+  // --- CARGA DE DATOS (AL MONTAR EL COMPONENTE) ---
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Ejecutamos todas las peticiones en paralelo para que sea más rápido
+        const [kpiRes, topRes, historyRes, typesRes, qRes] = await Promise.all([
+          fetch('https://api-ia-9704af5f4972.herokuapp.com/dashboard/kpis'),
+          fetch('https://api-ia-9704af5f4972.herokuapp.com/dashboard/top-stores'),
+          fetch('https://api-ia-9704af5f4972.herokuapp.com/dashboard/sales-history'),
+          fetch('https://api-ia-9704af5f4972.herokuapp.com/dashboard/store-types'),
+          fetch('https://api-ia-9704af5f4972.herokuapp.com/dashboard/quarterly')
+        ]);
 
-                const result = await response.json();
-                setData(result);
-            } catch (error) {
-                console.error(error);
-                toast.error("No se pudieron cargar las estadísticas del Dashboard");
-            } finally {
-                setLoading(false);
-            }
-        };
+        // Verificamos si alguna falló
+        if (!kpiRes.ok || !topRes.ok) throw new Error("Error en la respuesta del servidor");
 
-        fetchDashboard();
-    }, []);
+        const kpisData = await kpiRes.json();
+        const topData = await topRes.json();
+        const historyData = await historyRes.json();
+        const typesData = await typesRes.json();
+        const qData = await qRes.json();
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-lg text-muted-foreground animate-pulse">Analizando 40,000+ registros de ventas...</p>
-            </div>
-        );
-    }
+        setKpis(kpisData);
+        setTopStores(topData);
+        setSalesHistory(historyData);
+        setStoreTypes(typesData);
+        setQuarterlyData(qData);
+        
+      } catch (error) {
+        console.error("Error cargando dashboard:", error);
+        toast.error("No se pudieron cargar los datos del dashboard. Revisa tu backend.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (!data) return null;
+    fetchDashboardData();
+  }, []);
 
+  // --- ESTADO DE CARGA ---
+  if (loading) {
     return (
-        <div className="min-h-screen py-8 px-4">
-            <div className="container mx-auto max-w-7xl">
-                <div className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2">Dashboard Analítico (Test Data)</h1>
-                    <p className="text-muted-foreground">
-                        Análisis global de predicciones basado en el archivo <code>test.csv</code>.
-                    </p>
-                </div>
-
-                {/* Metrics Overview */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard
-                        title="Registros Procesados"
-                        value={data.total_records.toLocaleString()}
-                        icon={Database}
-                        subtitle="Filas en test.csv"
-                    />
-                    <StatCard
-                        title="Tiendas Activas"
-                        value={data.total_stores}
-                        icon={Store}
-                        subtitle="En el periodo de prueba"
-                    />
-                    <StatCard
-                        title="Ventas Totales Predichas"
-                        value={`$${(data.total_predicted_sales / 1000000).toFixed(1)}M`}
-                        icon={DollarSign}
-                        subtitle="Proyección global"
-                    />
-                    <StatCard
-                        title="Promedio por Tienda"
-                        value={`$${data.avg_sales_per_store.toLocaleString('es-ES', { maximumFractionDigits: 0 })}`}
-                        icon={TrendingUp}
-                        subtitle="Venta acumulada prom."
-                    />
-                </div>
-
-                {/* Charts Grid */}
-                <div className="grid lg:grid-cols-2 gap-6 mb-6">
-                    {/* Top Stores */}
-                    <Card className="p-6">
-                        <h2 className="text-xl font-semibold mb-4">Top 5 Sucursales (Mayor Venta)</h2>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={data.top_stores} layout="vertical" margin={{ left: 20 }}>
-                                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                                    <XAxis type="number" tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
-                                    <YAxis type="category" dataKey="name" width={100} className="text-xs" />
-                                    <Tooltip
-                                        formatter={(value: any) => [`$${value.toLocaleString()}`, 'Ventas']}
-                                        contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '8px' }}
-                                    />
-                                    <Bar dataKey="ventas" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={30} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </Card>
-
-                    {/* Sales Over Time */}
-                    <Card className="p-6">
-                        <h2 className="text-xl font-semibold mb-4">Proyección Temporal Global</h2>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={data.sales_over_time}>
-                                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-                                    <XAxis
-                                        dataKey="date"
-                                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                                        minTickGap={30}
-                                    />
-                                    <YAxis
-                                        tickFormatter={(value) => `$${(value / 1000000).toFixed(1)}M`}
-                                    />
-                                    <Tooltip
-                                        formatter={(value: any) => [`$${value.toLocaleString()}`, 'Ventas']}
-                                        labelFormatter={(label) => `Fecha: ${label}`}
-                                    />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="ventas"
-                                        stroke="hsl(var(--accent))"
-                                        strokeWidth={3}
-                                        dot={false}
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </Card>
-                </div>
-
-                <div className="grid lg:grid-cols-2 gap-6 mb-6">
-                    {/* Store Types Distribution */}
-                    <Card className="p-6">
-                        <h2 className="text-xl font-semibold mb-4">Distribución por Tipo de Tienda</h2>
-                        <div className="h-80">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={data.store_types}
-                                        cx="50%"
-                                        cy="50%"
-                                        labelLine={false}
-                                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                        outerRadius={100}
-                                        fill="#8884d8"
-                                        dataKey="value"
-                                    >
-                                        {data.store_types.map((entry: any, index: number) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </Card>
-                </div>
-            </div>
-        </div>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-muted-foreground">Procesando millones de registros históricos...</p>
+      </div>
     );
+  }
+
+  return (
+    <div className="min-h-screen py-8 px-4 bg-gray-50/50">
+      <div className="container mx-auto max-w-7xl">
+        
+        {/* HEADER */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 flex items-center gap-3">
+            <BarChart3 className="h-8 w-8 text-primary" />
+            Dashboard Analítico
+          </h1>
+          <p className="text-muted-foreground ml-11">
+            Análisis de inteligencia de negocios basado en datos históricos reales (2013-2015).
+          </p>
+        </div>
+        
+        {/* 1. METRICS OVERVIEW (KPIs) */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard
+            title="Ventas Históricas Totales"
+            value={kpis ? formatCompactCurrency(kpis.total_sales) : "0"}
+            icon={DollarSign}
+            subtitle="Ingresos brutos acumulados"
+          />
+          <StatCard
+            title="Clientes Totales"
+            value={kpis?.total_customers?.toLocaleString('de-DE') || "0"}
+            icon={Users}
+            subtitle="Visitas registradas"
+          />
+          <StatCard
+            title="Registros Procesados"
+            value={kpis?.total_records?.toLocaleString('de-DE') || "0"}
+            icon={Database}
+            subtitle="Filas en el dataset (Train)"
+          />
+          <StatCard
+            title="Total Sucursales"
+            value={kpis?.total_stores || "0"}
+            icon={Store}
+            subtitle="Tiendas físicas activas"
+          />
+        </div>
+        
+        {/* 2. CHARTS GRID - ROW 1 */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+          
+          {/* A. HISTORIAL DE VENTAS MENSUAL */}
+          <Card className="p-6 shadow-sm border-muted/60">
+            <h2 className="text-xl font-semibold mb-1">Evolución de Ventas</h2>
+            <p className="text-sm text-muted-foreground mb-4">Comportamiento mensual (Ene 2013 - Jul 2015)</p>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={salesHistory} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
+                  <XAxis 
+                    dataKey="mes" 
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                    // Mostrar solo algunos meses para no saturar si son muchos datos
+                    interval={2} 
+                  />
+                  <YAxis 
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                    tickFormatter={(val) => formatCompactCurrency(val)}
+                  />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
+                    formatter={(val: number) => [new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val), "Ventas"]}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="ventas" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2}
+                    dot={false}
+                    name="Ventas Mensuales"
+                    activeDot={{ r: 6 }}
+                  />
+                  {/* Opcional: Línea de Clientes en eje secundario si quisieras */}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          {/* B. TOP STORES */}
+          <Card className="p-6 shadow-sm border-muted/60">
+            <h2 className="text-xl font-semibold mb-1">Top 5 Sucursales</h2>
+            <p className="text-sm text-muted-foreground mb-4">Tiendas con mayor volumen de venta histórico</p>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topStores} layout="vertical" margin={{ left: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} className="stroke-border" />
+                  <XAxis 
+                    type="number" 
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                    tickFormatter={(val) => formatCompactCurrency(val)}
+                  />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    tick={{ fill: 'hsl(var(--foreground))', fontSize: 12, fontWeight: 500 }}
+                    width={80}
+                  />
+                  <Tooltip 
+                     contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
+                     formatter={(val: number) => [new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val), "Total Ventas"]}
+                  />
+                  <Bar dataKey="ventas" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={30} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </div>
+        
+        {/* 3. CHARTS GRID - ROW 2 */}
+        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+          
+          {/* C. DISTRIBUCIÓN POR TIPO */}
+          <Card className="p-6 shadow-sm border-muted/60">
+            <h2 className="text-xl font-semibold mb-4">Distribución por Tipo de Tienda</h2>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={storeTypes}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60} // Donut chart se ve más moderno
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {storeTypes.map((entry: any, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} strokeWidth={0} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                     formatter={(val: number) => [val, "Tiendas"]}
+                     contentStyle={{ borderRadius: '8px' }}
+                  />
+                  <Legend verticalAlign="bottom" height={36}/>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+          
+          {/* D. VENTAS TRIMESTRALES */}
+          <Card className="p-6 shadow-sm border-muted/60">
+            <h2 className="text-xl font-semibold mb-1">Estacionalidad Trimestral</h2>
+            <p className="text-sm text-muted-foreground mb-4">Acumulado histórico por trimestre (Q1-Q4)</p>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={quarterlyData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
+                  <XAxis 
+                    dataKey="trimestre" 
+                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis 
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                    tickFormatter={(val) => formatCompactCurrency(val)}
+                  />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '8px', border: '1px solid hsl(var(--border))' }}
+                    formatter={(val: number) => [new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val), "Ventas"]}
+                  />
+                  <Bar dataKey="ventas" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </div>
+        
+      </div>
+    </div>
+  );
 };
 
 export default Dashboard;
