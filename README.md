@@ -63,8 +63,8 @@ Para desplegar este proyecto, es necesario clonar y configurar ambos repositorio
 
 1.  **Clonar el repositorio del backend:**
     ```bash
-    git clone <URL_DEL_REPOSITORIO_BACKEND>
-    cd api_modelo
+    git clone https://github.com/laespiga0120/sales-forecast-backend.git
+    cd sales-forecast-backend
     ```
 
 2.  **(Recomendado) Crear y activar un entorno virtual:**
@@ -88,7 +88,7 @@ Para desplegar este proyecto, es necesario clonar y configurar ambos repositorio
 
 1.  **Clonar el repositorio del frontend:**
     ```bash
-    git clone <URL_DEL_REPOSITORIO_FRONTEND>
+    git clone https://github.com/laespiga0120/sales-forecast-lab.git
     cd sales-forecast-lab
     ```
 
@@ -111,7 +111,7 @@ Cree un archivo `.env` en la raíz del directorio del **frontend** y/o del **bac
 VITE_API_BASE_URL=http://127.0.0.1:5000
 ```
 
-**Ejemplo para el Backend (`api_modelo/.env`):**
+**Ejemplo para el Backend (`sales-forecast-backend/.env`):**
 ```
 # Entorno de Flask (development, production)
 FLASK_ENV=development
@@ -125,7 +125,7 @@ FLASK_DEBUG=1
 ### Entorno de Desarrollo
 
 1.  **Iniciar el Backend:**
-    Asegúrese de estar en el directorio `api_modelo` con el entorno virtual activado.
+    Asegúrese de estar en el directorio `sales-forecast-backend` con el entorno virtual activado.
     ```bash
     # Se asume que el punto de entrada es app.py dentro de src/
     export FLASK_APP=src.app
@@ -143,7 +143,7 @@ FLASK_DEBUG=1
 ### Entorno de Producción
 
 1.  **Servir el Backend con Gunicorn:**
-    Desde el directorio `api_modelo`, ejecute Gunicorn.
+    Desde el directorio `sales-forecast-backend`, ejecute Gunicorn.
     ```bash
     # Servir la aplicación en el puerto 8000 con 4 workers
     gunicorn --workers 4 --bind 0.0.0.0:8000 src.app:app
